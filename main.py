@@ -1,27 +1,22 @@
 import openai
-from aiogram import Bot, types
-from aiogram.dispatcher import Dispatcher
-from aiogram.utils import executor
+import telebot
 
 token = 'token_telegram_api'
 
 openai.api.token = 'token_openai_api'
 
-bot = Bot(token)
-dp = Dispatcher(bot)
-
-@dp.message_handler()
-async def send(message : types.Message):
+@bot.message_handler(func=lambda _: True)
+def handle_message(message):
     response = openai.Completion.create(
-        model="code-davinci-003",
+        model="text-davinci-003",
         prompt=message.text,
-        temperature=0.9,
+        temperature=0.5,
         max_tokens=1000,
         top_p=1.0,
-        frequency_penalty=0.0,
-        presence_penalty=0.6,
-        stop=["You:"]
+        frequency_penalty=0.5,
+        presence_penalty=0.0,
     )
-    await message.answer(response['choices'][0]['text'])
+    bot.send_message(chat_id=message.from_user.id, text=response['choices'][0]['text'])
 
-    executor.start_polling(dp, skip_updates=True)
+
+bot.polling()
